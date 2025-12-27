@@ -8,7 +8,7 @@ namespace Users.src.Application.Services
 {
   public class UsersService : IUsersService
   {
-    IUserRepository _repository;
+    readonly IUserRepository _repository;
 
     public UsersService(IUserRepository repository)
     {

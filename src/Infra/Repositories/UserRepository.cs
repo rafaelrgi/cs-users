@@ -8,7 +8,7 @@ namespace Users.src.Infra.Repositories
 {
   public class UserRepository : IUserRepository
   {
-    Db _db;
+    readonly Db _db;
 
     public UserRepository(Db db)
     {

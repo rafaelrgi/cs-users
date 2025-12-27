@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Users.src.Application.Dtos;
 using Users.src.Domain.Contracts;
 using Users.src.Domain.Entities;

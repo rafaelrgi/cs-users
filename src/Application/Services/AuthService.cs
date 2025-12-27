@@ -1,6 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Users.src.Domain.Contracts;
 using Users.src.Domain.Entities;
@@ -10,8 +11,7 @@ namespace Users.src.Application.Services
   public class AuthService : IAuthService
   {
     const int VALIDITY_TOKEN_HOURS = 11;
-    //using a property-like const so the "Program" can use it too
-    public static string JWT_CONFIG_KEY { get => "Jwt:Key"; }
+    const string JWT_CONFIG_KEY = "PrivateKey";
 
     readonly IConfiguration _configuration;
     readonly IUsersService _users;
@@ -43,6 +43,8 @@ namespace Users.src.Application.Services
       if (string.IsNullOrWhiteSpace(jwtKey))
         return "";
 
+      var rsa = RSA.Create();
+      rsa.ImportFromPem(jwtKey.ToCharArray());
       var key = Encoding.ASCII.GetBytes(jwtKey);
       var tokenDescriptor = new SecurityTokenDescriptor
       {
@@ -54,15 +56,17 @@ namespace Users.src.Application.Services
             //new Claim(ClaimTypes.Role, user.Role)
           ]),
         Expires = DateTime.UtcNow.AddHours(hoursValidity),
-        SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        SigningCredentials = new SigningCredentials(new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256),
       };
 
       var token = tokenHandler.CreateToken(tokenDescriptor);
       return tokenHandler.WriteToken(token);
     }
+
     private static bool CheckPassword(string pass, string hash)
     {
       return BCrypt.Net.BCrypt.Verify(pass, hash);
     }
+
   }
 }

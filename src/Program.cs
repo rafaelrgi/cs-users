@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
 using System.Text;
 using Users.Data;
 using Users.src.Application.Services;
@@ -21,7 +23,10 @@ builder.Services.AddScoped<IUsersService, UsersService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Configure the HTTP request pipeline.
-var jwtKey = Encoding.ASCII.GetBytes(builder.Configuration[AuthService.JWT_CONFIG_KEY] ?? "");
+var publicKey = builder.Configuration["RsaKeys:PublicKey"] ?? "";
+var rsa = RSA.Create();
+rsa.ImportFromPem(publicKey.ToCharArray());
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(options =>
 {
@@ -32,7 +37,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
   options.TokenValidationParameters = new TokenValidationParameters
   {
     ValidateIssuerSigningKey = true,
-    IssuerSigningKey = new SymmetricSecurityKey(jwtKey),
+    IssuerSigningKey = new RsaSecurityKey(rsa),
     ValidateIssuer = false,
     ValidateAudience = false,
     ValidateLifetime = true,
