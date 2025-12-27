@@ -21,5 +21,9 @@ namespace Users.src.Domain.Entities
     [Required, StringLength(128), MinLength(3)]
     public string Password { get; set; } = "";
 
+    [JsonPropertyName("isAdmin")]
+    [Required]
+    public bool IsAdmin { get; set; }
+
   }
 }

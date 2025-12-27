@@ -1,5 +1,4 @@
-﻿using System.Security.Policy;
-using Users.src.Application.Dtos;
+﻿using Users.src.Application.Dtos;
 using Users.src.Domain.Contracts;
 using Users.src.Domain.Core;
 using Users.src.Domain.Entities;
@@ -93,6 +92,7 @@ namespace Users.src.Application.Services
         Id = user.Id,
         Name = user.Name,
         Email = user.Email,
+        IsAdmin = user.IsAdmin,
         CreatedAt = user.CreatedAt,
         UpdatedAt = user.UpdatedAt,
         DeletedAt = user.DeletedAt,

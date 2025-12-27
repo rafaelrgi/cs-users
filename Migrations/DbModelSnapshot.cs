@@ -34,22 +34,31 @@ namespace Users.Migrations
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(128)
-                        .HasColumnType("varchar(128)");
+                        .HasColumnType("varchar(128)")
+                        .HasAnnotation("Relational:JsonPropertyName", "email");
+
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("tinyint(1)")
+                        .HasAnnotation("Relational:JsonPropertyName", "isAdmin");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(64)
-                        .HasColumnType("varchar(64)");
+                        .HasColumnType("varchar(64)")
+                        .HasAnnotation("Relational:JsonPropertyName", "name");
 
                     b.Property<string>("Password")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("varchar(64)");
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)")
+                        .HasAnnotation("Relational:JsonPropertyName", "password");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Email");
 
                     b.ToTable("Users");
                 });

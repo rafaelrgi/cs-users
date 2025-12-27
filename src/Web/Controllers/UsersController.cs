@@ -47,10 +47,12 @@ namespace Users.src.Web.Controllers
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
+    //[AllowAnonymous]
     public async Task<ActionResult> Create([FromBody] User user)
     {
       if (!ModelState.IsValid)
-        return BadRequest();
+        return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
 
       try
       {
@@ -66,10 +68,11 @@ namespace Users.src.Web.Controllers
     }
 
     [HttpPut("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult> Edit(int id, [FromBody] User user)
     {
       if (!ModelState.IsValid)
-        return BadRequest();
+        return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
 
       user.Id = id;
       try
@@ -85,6 +88,7 @@ namespace Users.src.Web.Controllers
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult> Delete(int id)
     {
       if (!await _service.Delete(id))
@@ -93,6 +97,7 @@ namespace Users.src.Web.Controllers
     }
 
     [HttpPatch("{id}")]
+    [Authorize(Roles = "Admin")]
     public async Task<ActionResult> UnDelete(int id)
     {
       if (!await _service.UnDelete(id))

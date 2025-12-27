@@ -24,6 +24,7 @@ namespace Users.src.Web.Controllers
         {
           Id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
           Name = User.Identity!.Name,
+          Admin = User.IsInRole("Admin"),
           AuthType = User.Identity.AuthenticationType,
     }
       };

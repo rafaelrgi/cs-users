@@ -23,7 +23,8 @@ namespace Users.Migrations
                         .Annotation("MySQL:ValueGenerationStrategy", MySQLValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: false),
                     Email = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false),
-                    Password = table.Column<string>(type: "varchar(64)", maxLength: 64, nullable: false),
+                    Password = table.Column<string>(type: "varchar(128)", maxLength: 128, nullable: false),
+                    IsAdmin = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true),
                     DeletedAt = table.Column<DateTime>(type: "datetime(6)", nullable: true)
@@ -33,6 +34,11 @@ namespace Users.Migrations
                     table.PrimaryKey("PK_Users", x => x.Id);
                 })
                 .Annotation("MySQL:Charset", "utf8mb4");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email");
         }
 
         /// <inheritdoc />
