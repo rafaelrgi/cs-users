@@ -20,7 +20,7 @@ namespace Users.src.Web.Controllers
         Status = "API is ready!",
         IsDocker = isDocker,
         IsAuth = isAuth,
-        User = !isAuth ? null : new 
+        User = !isAuth ? null : new
         {
           Id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
           Name = User.Identity!.Name,
@@ -29,7 +29,7 @@ namespace Users.src.Web.Controllers
     }
       };
 
-      return Ok(result);      
+      return Ok(result);
     }
 
   }

@@ -22,6 +22,7 @@ namespace Users.src.Web.Controllers
     [AllowAnonymous]
     public async Task<ActionResult> Login([FromBody] User user)
     {
+      //Console.WriteLine($">>>>>>>>>>User: {user}");
       if (string.IsNullOrWhiteSpace(user.Email) || string.IsNullOrWhiteSpace(user.Password))
         return BadRequest();
 
@@ -31,6 +32,6 @@ namespace Users.src.Web.Controllers
 
       return Ok(new { token = token });
     }
-        
+
   }
 }

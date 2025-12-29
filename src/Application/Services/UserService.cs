@@ -5,11 +5,11 @@ using Users.src.Domain.Entities;
 
 namespace Users.src.Application.Services
 {
-  public class UsersService : IUsersService
+  public class UserService : IUserService
   {
     readonly IUserRepository _repository;
 
-    public UsersService(IUserRepository repository)
+    public UserService(IUserRepository repository)
     {
       _repository = repository;
     }

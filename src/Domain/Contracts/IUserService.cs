@@ -4,7 +4,7 @@ using Users.src.Domain.Entities;
 
 namespace Users.src.Domain.Contracts
 {
-  public interface IUsersService
+  public interface IUserService
   {
     Task<UserDto?> Find(int id);
     Task<User?> FindByEmail(string email);

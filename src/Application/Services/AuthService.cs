@@ -14,9 +14,9 @@ namespace Users.src.Application.Services
     const string JWT_CONFIG_KEY = "PrivateKey";
 
     readonly IConfiguration _configuration;
-    readonly IUsersService _users;
+    readonly IUserService _users;
 
-    public AuthService(IConfiguration configuration, IUsersService users)
+    public AuthService(IConfiguration configuration, IUserService users)
     {
       _configuration = configuration;
       _users = users;
@@ -40,6 +40,8 @@ namespace Users.src.Application.Services
     {
       var tokenHandler = new JwtSecurityTokenHandler();
       var jwtKey = _configuration[JWT_CONFIG_KEY];
+      //Console.WriteLine($">>>>>>>>>>jwtKey?: {string.IsNullOrWhiteSpace(jwtKey)? "Empty!!!!" : "OK}");
+
       if (string.IsNullOrWhiteSpace(jwtKey))
         return "";
 

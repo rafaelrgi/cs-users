@@ -12,6 +12,9 @@ using Users.src.Infra.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//TODO: //FIXME: REMOVE FOR PRODUCTION!!!!!
+builder.Configuration.AddUserSecrets<Program>();
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddDbContext<Db>(options =>
@@ -19,10 +22,10 @@ builder.Services.AddDbContext<Db>(options =>
   options.UseMySQL(builder.Configuration.GetConnectionString(Db.ConnectionName)!);
 });
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Configure the HTTP request pipeline.
+// Authorization
 var publicKey = builder.Configuration["RsaKeys:PublicKey"] ?? "";
 var rsa = RSA.Create();
 rsa.ImportFromPem(publicKey.ToCharArray());
@@ -54,6 +57,7 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

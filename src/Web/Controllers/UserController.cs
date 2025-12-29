@@ -6,13 +6,13 @@ using Users.src.Domain.Entities;
 
 namespace Users.src.Web.Controllers
 {
-  [Route("api/[controller]")]
-  public class UsersController : Controller
+  [Route("api/users")]
+  public class UserController : Controller
   {
-    readonly IUsersService _service;
+    readonly IUserService _service;
     readonly IAuthService _auth;
 
-    public UsersController(IUsersService service, IAuthService auth)
+    public UserController(IUserService service, IAuthService auth)
     {
       _service = service;
       _auth = auth;
@@ -96,7 +96,7 @@ namespace Users.src.Web.Controllers
       return NoContent();
     }
 
-    [HttpPatch("{id}")]
+    [HttpPatch("activate/{id}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult> UnDelete(int id)
     {
@@ -104,6 +104,6 @@ namespace Users.src.Web.Controllers
         return NotFound();
       return NoContent();
     }
-        
+
   }
 }
