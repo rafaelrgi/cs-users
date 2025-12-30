@@ -6,9 +6,11 @@ using Users.src.Domain.Entities;
 
 namespace Users.src.Web.Controllers
 {
-  [Route("api/users")]
+  [Route(ROUTE)]
   public class UserController : Controller
   {
+    const string ROUTE = "api/users";
+
     readonly IUserService _service;
     readonly IAuthService _auth;
 
@@ -57,7 +59,7 @@ namespace Users.src.Web.Controllers
       try
       {
         var dto = await _service.Save(user);
-        var uri = new Uri($"api/users/{dto.Id}", UriKind.Relative);
+        var uri = new Uri($"{ROUTE}/{dto.Id}", UriKind.Relative);
         return Created(uri, dto);
       }
       catch (Exception e)

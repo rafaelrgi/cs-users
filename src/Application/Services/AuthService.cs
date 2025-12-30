@@ -13,13 +13,15 @@ namespace Users.src.Application.Services
     const int VALIDITY_TOKEN_HOURS = 11;
     const string JWT_CONFIG_KEY = "PrivateKey";
 
-    readonly IConfiguration _configuration;
     readonly IUserService _users;
+    readonly IConfiguration _configuration;
+    readonly ILogger<AuthService> _logger;
 
-    public AuthService(IConfiguration configuration, IUserService users)
+    public AuthService(IConfiguration configuration, IUserService users, ILogger<AuthService> logger)
     {
       _configuration = configuration;
       _users = users;
+      _logger = logger;
     }
 
     public async Task<string> Login(string email, string password)
@@ -27,10 +29,16 @@ namespace Users.src.Application.Services
       email = (email ?? "").Trim();
       var user = await _users.FindByEmail(email);
       if (user == null)
+      {
+        _logger.LogWarning($"Login: user not found {email}");
         return "";
+      }
 
       if (!CheckPassword(password, user.Password))
+      {
+        _logger.LogWarning($"Login: wrong password for user {email}");
         return "";
+      }
 
       var token = GenerateToken(user, VALIDITY_TOKEN_HOURS);
       return token;
@@ -40,10 +48,12 @@ namespace Users.src.Application.Services
     {
       var tokenHandler = new JwtSecurityTokenHandler();
       var jwtKey = _configuration[JWT_CONFIG_KEY];
-      //Console.WriteLine($">>>>>>>>>>jwtKey?: {string.IsNullOrWhiteSpace(jwtKey)? "Empty!!!!" : "OK}");
 
       if (string.IsNullOrWhiteSpace(jwtKey))
+      {
+        _logger.LogError($"Could no load Public Key from {JWT_CONFIG_KEY}");
         return "";
+      }
 
       var rsa = RSA.Create();
       rsa.ImportFromPem(jwtKey.ToCharArray());

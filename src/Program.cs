@@ -15,6 +15,8 @@ var builder = WebApplication.CreateBuilder(args);
 //TODO: //FIXME: REMOVE FOR PRODUCTION!!!!!
 builder.Configuration.AddUserSecrets<Program>();
 
+using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddDbContext<Db>(options =>

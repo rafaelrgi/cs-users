@@ -20,6 +20,7 @@ namespace Users.src.Web.Controllers
         Status = "API is ready!",
         IsDocker = isDocker,
         IsAuth = isAuth,
+        BaseDir = AppContext.BaseDirectory,
         User = !isAuth ? null : new
         {
           Id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
