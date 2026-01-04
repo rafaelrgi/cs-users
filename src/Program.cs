@@ -57,11 +57,23 @@ builder.Services.AddAuthorization(options =>
       .Build();
 });
 
+//Cors configuration
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy("AllowAngularApp",
+      builder =>
+      {
+        builder.WithOrigins("http://localhost:4200")
+                 .AllowAnyHeader()
+                 .AllowAnyMethod();
+      });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseCors("AllowAngularApp");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();
