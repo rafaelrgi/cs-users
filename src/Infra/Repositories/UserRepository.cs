@@ -23,10 +23,13 @@ namespace Users.src.Infra.Repositories
 
       //pagination
       int totalRecords = await qry.CountAsync();
-      int skip = page * perPage - perPage;
-      qry = qry
-              .Skip(skip)
-              .Take(perPage);
+      if (perPage > 0)
+      {
+        int skip = page * perPage - perPage;
+        qry = qry
+                .Skip(skip)
+                .Take(perPage);
+      }
 
       //Console.WriteLine(qry.ToQueryString());
       var rows = await qry.AsNoTracking().ToListAsync();

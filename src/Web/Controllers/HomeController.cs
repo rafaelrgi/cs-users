@@ -20,14 +20,18 @@ namespace Users.src.Web.Controllers
         Status = "API is ready!",
         IsDocker = isDocker,
         IsAuth = isAuth,
+#if DEBUG
         BaseDir = AppContext.BaseDirectory,
+#endif
         User = !isAuth ? null : new
         {
           Id = User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
-          Name = User.Identity!.Name,
-          Admin = User.IsInRole("Admin"),
-          AuthType = User.Identity.AuthenticationType,
-    }
+#if DEBUG
+          AuthType = User.Identity!.AuthenticationType,
+#endif
+          Name = User!.Identity!.Name,
+          IsAdmin = User.IsInRole("Admin"),
+        }
       };
 
       return Ok(result);

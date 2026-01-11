@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Users.src.Application.Dtos;
+using Users.src.Application.Services;
 using Users.src.Domain.Contracts;
-using Users.src.Domain.Entities;
 
 namespace Users.src.Web.Controllers
 {
@@ -13,11 +13,13 @@ namespace Users.src.Web.Controllers
 
     readonly IUserService _service;
     readonly IAuthService _auth;
+    readonly ILogger<AuthService> _logger;
 
-    public UserController(IUserService service, IAuthService auth)
+    public UserController(IUserService service, IAuthService auth, ILogger<AuthService> logger)
     {
       _service = service;
       _auth = auth;
+      _logger = logger;
     }
 
     [HttpGet]
@@ -29,7 +31,7 @@ namespace Users.src.Web.Controllers
       if (!int.TryParse(HttpContext.Request.Query["perPage"], out int perPage))
         perPage = 10;
       page = Math.Max(page, 1);
-      perPage = Math.Min(perPage, 50);
+      //perPage = Math.Min(perPage, 50);
 
       var result = await _service.FindAll(page, perPage);
       if (!result.HasData)
@@ -51,36 +53,41 @@ namespace Users.src.Web.Controllers
     [HttpPost]
     [Authorize(Roles = "Admin")]
     //[AllowAnonymous]
-    public async Task<ActionResult> Create([FromBody] User user)
+    public async Task<ActionResult> Create([FromBody] UserSaveDto dto)
     {
-      if (!ModelState.IsValid)
-        return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
-
       try
       {
-        var dto = await _service.Save(user);
-        var uri = new Uri($"{ROUTE}/{dto.Id}", UriKind.Relative);
-        return Created(uri, dto);
+        var result = await _service.Save(dto);
+        if (result.Forbidden)
+          return Forbid();
+
+        if (!result.Success || result.Data == null)
+          return BadRequest(result.ErrorMessage);
+
+        var uri = new Uri($"{ROUTE}/{result.Data!.Id}", UriKind.Relative);
+        return Created(uri, result.Data);
       }
       catch (Exception e)
       {
         Console.WriteLine(e.ToString());
-        throw new Exception(e.Message);
+        throw new NotImplementedException();
       }
     }
 
     [HttpPut("{id}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<ActionResult> Edit(int id, [FromBody] User user)
+    //[Authorize(Roles = "Admin")] User can edit his own profile
+    public async Task<ActionResult> Edit(int id, [FromBody] UserSaveDto dto)
     {
-      if (!ModelState.IsValid)
-        return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
-
-      user.Id = id;
       try
       {
-        var dto = await _service.Save(user);
-        return Ok(dto);
+        var result = await _service.Save(dto, id);
+        if (result.Success)
+          return Ok(result.Data);
+
+        if (result.Forbidden)
+          return Forbid();
+
+        return BadRequest(result.ErrorMessage);
       }
       catch (Exception e)
       {

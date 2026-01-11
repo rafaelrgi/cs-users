@@ -16,9 +16,8 @@ namespace Users.Data
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-      //modelBuilder.Entity<User>().Property(x => x.Id);
-      //modelBuilder.Entity<User>().Property(x => x.Email);
-      modelBuilder.Entity<User>().HasQueryFilter(p => p.DeletedAt == null);
+      //bring the also the "blocked" (deleted) users, so they can be unblocked
+      //modelBuilder.Entity<User>().HasQueryFilter(p => p.DeletedAt == null);
     }
 
     public override int SaveChanges()

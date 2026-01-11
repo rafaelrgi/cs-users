@@ -1,7 +1,9 @@
-﻿namespace Users.src.Domain.Contracts
+﻿using Users.src.Domain.Entities;
+
+namespace Users.src.Domain.Contracts
 {
   public interface IAuthService
   {
-    Task<string> Login(string email, string password);
+    Task<(string token, User? user)> Login(string email, string password);
   }
 }

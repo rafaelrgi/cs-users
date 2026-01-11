@@ -24,24 +24,31 @@ namespace Users.src.Application.Services
       _logger = logger;
     }
 
-    public async Task<string> Login(string email, string password)
+    public async Task<(string token, User? user)> Login(string email, string password)
     {
+      string token = "";
       email = (email ?? "").Trim();
       var user = await _users.FindByEmail(email);
       if (user == null)
       {
         _logger.LogWarning($"Login: user not found {email}");
-        return "";
+        return ("", null);
+      }
+
+      if (user.IsDeleted)
+      {
+        _logger.LogWarning($"Login: user is blocked: {email}");
+        return ("", null);
       }
 
       if (!CheckPassword(password, user.Password))
       {
         _logger.LogWarning($"Login: wrong password for user {email}");
-        return "";
+        return ("", null);
       }
 
-      var token = GenerateToken(user, VALIDITY_TOKEN_HOURS);
-      return token;
+      token = GenerateToken(user, VALIDITY_TOKEN_HOURS);
+      return (token, user);
     }
 
     public string GenerateToken(User user, int hoursValidity)
@@ -75,7 +82,7 @@ namespace Users.src.Application.Services
       return tokenHandler.WriteToken(token);
     }
 
-    private static bool CheckPassword(string pass, string hash)
+    public static bool CheckPassword(string pass, string hash)
     {
       return BCrypt.Net.BCrypt.Verify(pass, hash);
     }
