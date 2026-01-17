@@ -31,7 +31,7 @@ namespace Users.src.Web.Controllers
       if (!int.TryParse(HttpContext.Request.Query["perPage"], out int perPage))
         perPage = 10;
       page = Math.Max(page, 1);
-      //perPage = Math.Min(perPage, 50);
+      perPage = Math.Max(perPage, 2);
 
       var result = await _service.FindAll(page, perPage);
       if (!result.HasData)

@@ -77,6 +77,7 @@ namespace Users.src.Application.Services
           row.DeletedAt = null;
       }
 
+      //UNDONE: base service maybe? base entity maybe?
       var results = new List<ValidationResult>();
       var context = new ValidationContext(row, serviceProvider: null, items: null);
       if (!Validator.TryValidateObject(row, context, results, validateAllProperties: true))
