@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Users.src.Application.Dtos;
+﻿using Users.src.Application.Dtos;
 using Users.src.Domain.Common;
 using Users.src.Domain.Contracts;
 using Users.src.Domain.Core;
@@ -77,16 +76,9 @@ namespace Users.src.Application.Services
           row.DeletedAt = null;
       }
 
-      //UNDONE: base service maybe? base entity maybe?
-      var results = new List<ValidationResult>();
-      var context = new ValidationContext(row, serviceProvider: null, items: null);
-      if (!Validator.TryValidateObject(row, context, results, validateAllProperties: true))
-      {
-        string s = string.Join(" \r\n", results);
-        if (string.IsNullOrWhiteSpace(s))
-          s = "The object is invalid.";
-        return new(null, false, false, s);
-      }
+      var errors = User.Validate(row);
+      if (!string.IsNullOrEmpty(errors))
+        return new(null, false, false, errors);
 
       var result = UserToDto(await _repository.Save(row));
       return new(result, true);
