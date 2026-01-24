@@ -6,18 +6,12 @@ using Users.src.Domain.Entities;
 
 namespace Users.src.Application.Services
 {
-  public class UserService : IUserService
+  public class UserService(IUserRepository repository) : IUserService
   {
-    readonly IUserRepository _repository;
-
-    public UserService(IUserRepository repository)
-    {
-      _repository = repository;
-    }
 
     public async Task<UserDto?> Find(int id)
     {
-      var row = await _repository.Find(id);
+      var row = await repository.Find(id);
       if (row == null)
         return null;
       return UserToDto(row);
@@ -25,7 +19,7 @@ namespace Users.src.Application.Services
 
     public async Task<User?> FindByEmail(string email)
     {
-      var row = await _repository.FindByEmail(email);
+      var row = await repository.FindByEmail(email);
       return row;
     }
 
@@ -33,13 +27,12 @@ namespace Users.src.Application.Services
     {
       //pagination
       page = Math.Max(page, 1);
-      //perPage = Math.Min(perPage, 50);      
 
       //sort & order  
       const string sort = "Name";
       const string order = "asc";
 
-      var users = await _repository.FindAll(page, perPage, sort, order);
+      var users = await repository.FindAll(page, perPage, sort, order);
       var result = UsersToDto(users);
       return result;
     }
@@ -47,7 +40,7 @@ namespace Users.src.Application.Services
     public async Task<Result<UserDto>> Save(UserSaveDto dto, int? userId = null)
     {
       int id = userId ?? 0;
-      User? row = (id > 0) ? await _repository.Find(id) : new User();
+      User? row = (id > 0) ? await repository.Find(id) : new User();
       UserFromDto(row, dto);
 
       row!.Id = id;
@@ -59,10 +52,10 @@ namespace Users.src.Application.Services
       {
         //changing password, check the old one
         if (row.Id > 0 && !AuthService.CheckPassword(dto.Password, row.Password))
-          return new(null, false, true);
+          return new("", true);
 
         if (dto.PasswordNew != dto.PasswordCheck)
-          return new(null, false, false, "Passwords do not match");
+          return new("Passwords do not match");
 
         row.Password = HashPassword(dto.PasswordNew);
       }
@@ -78,28 +71,28 @@ namespace Users.src.Application.Services
 
       var errors = User.Validate(row);
       if (!string.IsNullOrEmpty(errors))
-        return new(null, false, false, errors);
+        return new(ErrorMessage: errors);
 
-      var result = UserToDto(await _repository.Save(row));
-      return new(result, true);
+      var result = UserToDto(await repository.Save(row));
+      return new(result);
     }
 
     public async Task<bool> Delete(int id)
     {
-      var user = await _repository.Find(id);
+      var user = await repository.Find(id);
       if (user == null)
         return false;
 
-      return await _repository.Delete(user);
+      return await repository.Delete(user);
     }
 
     public async Task<bool> UnDelete(int id)
     {
-      var user = await _repository.Find(id, false);
+      var user = await repository.Find(id, false);
       if (user == null)
         return false;
 
-      return await _repository.UnDelete(user);
+      return await repository.UnDelete(user);
     }
 
     private Pagination<UserDto> UsersToDto(Pagination<User> users)

@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
-using System.Text;
 using Users.Data;
 using Users.src.Application.Services;
 using Users.src.Domain.Contracts;
@@ -21,7 +19,8 @@ using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsol
 builder.Services.AddControllers();
 builder.Services.AddDbContext<Db>(options =>
 {
-  options.UseMySQL(builder.Configuration.GetConnectionString(Db.ConnectionName)!);
+  options.UseMySQL(builder.Configuration.GetConnectionString(Db.ConnectionName)!,
+  x => x.MigrationsAssembly("Users"));
 });
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
