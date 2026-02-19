@@ -4,7 +4,7 @@ using Users.src.Application.Dtos;
 using Users.src.Application.Services;
 using Users.src.Domain.Contracts;
 
-namespace Users.src.Web.Controllers
+namespace Users.Web.Controllers
 {
   [Route(ROUTE)]
   public class UserController : Controller
@@ -69,8 +69,8 @@ namespace Users.src.Web.Controllers
       }
       catch (Exception e)
       {
-        Console.WriteLine(e.ToString());
-        throw new NotImplementedException();
+        _logger.LogError(e, "Error: {e.InnerException?.Message ?? e.Message}", dto);
+        return StatusCode(500, "Error: {e.InnerException?.Message ?? e.Message}");
       }
     }
 

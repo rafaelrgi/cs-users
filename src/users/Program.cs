@@ -3,15 +3,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
-using Users.Data;
 using Users.src.Application.Services;
 using Users.src.Domain.Contracts;
 using Users.src.Infra.Repositories;
+using Users.Infra;
+using Users.src.Infra.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
-
-//TODO: //FIXME: REMOVE FOR PRODUCTION!!!!!
-builder.Configuration.AddUserSecrets<Program>();
 
 using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsole());
 
@@ -19,7 +17,7 @@ using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsol
 builder.Services.AddControllers();
 builder.Services.AddDbContext<Db>(options =>
 {
-  options.UseMySQL(builder.Configuration.GetConnectionString(Db.ConnectionName)!,
+  options.UseNpgsql(builder.Configuration.GetConnectionString(Db.ConnectionName)!,
   x => x.MigrationsAssembly("Users"));
 });
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -27,34 +25,13 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Authorization
-var publicKey = builder.Configuration["RsaKeys:PublicKey"] ?? "";
-var rsa = RSA.Create();
-rsa.ImportFromPem(publicKey.ToCharArray());
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.AddJwtBearer(options =>
-{
-  //bearer.SaveToken = true;
-  options.RequireHttpsMetadata = false;
-  options.Authority = JwtBearerDefaults.AuthenticationScheme;
-  options.Audience = JwtBearerDefaults.AuthenticationScheme;
-  options.TokenValidationParameters = new TokenValidationParameters
-  {
-    ValidateIssuerSigningKey = true,
-    IssuerSigningKey = new RsaSecurityKey(rsa),
-    ValidateIssuer = false,
-    ValidateAudience = false,
-    ValidateLifetime = true,
-  };
-});
+builder.Services.AddRsaJwtAuthentication(builder.Configuration);
 
 //Require authorization by default for all requests
-builder.Services.AddAuthorization(options =>
-{
-  options.FallbackPolicy = new AuthorizationPolicyBuilder()
-      .RequireAuthenticatedUser()
-      .Build();
-});
+builder.Services.AddAuthorizationBuilder()
+    .SetFallbackPolicy(new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build());
 
 //Cors configuration
 builder.Services.AddCors(options =>

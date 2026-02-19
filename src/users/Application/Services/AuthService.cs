@@ -26,24 +26,24 @@ namespace Users.src.Application.Services
 
     public async Task<(string token, User? user)> Login(string email, string password)
     {
-      string token = "";
+      string token;
       email = (email ?? "").Trim();
       var user = await _users.FindByEmail(email);
       if (user == null)
       {
-        _logger.LogWarning($"Login: user not found {email}");
+        _logger.LogWarning("Login: user not found {email}", email);
         return ("", null);
       }
 
       if (user.IsDeleted)
       {
-        _logger.LogWarning($"Login: user is blocked: {email}");
+        _logger.LogWarning("Login: user is blocked: {email}", email);
         return ("", null);
       }
 
       if (!CheckPassword(password, user.Password))
       {
-        _logger.LogWarning($"Login: wrong password for user {email}");
+        _logger.LogWarning("Login: wrong password for user {email}", email);
         return ("", null);
       }
 
@@ -54,32 +54,49 @@ namespace Users.src.Application.Services
     public string GenerateToken(User user, int hoursValidity)
     {
       var tokenHandler = new JwtSecurityTokenHandler();
-      var jwtKey = _configuration[JWT_CONFIG_KEY];
-
-      if (string.IsNullOrWhiteSpace(jwtKey))
+      var keyPath = _configuration["RsaKeys:PrivateKeyPath"] ?? "";
+      if (string.IsNullOrEmpty(keyPath) || !File.Exists(keyPath))
       {
-        _logger.LogError($"Could no load Public Key from {JWT_CONFIG_KEY}");
-        return "";
+        _logger.LogError("Private Key not found at: {Path}", keyPath);
+        return string.Empty;
       }
 
-      var rsa = RSA.Create();
-      rsa.ImportFromPem(jwtKey.ToCharArray());
-      var key = Encoding.ASCII.GetBytes(jwtKey);
-      var tokenDescriptor = new SecurityTokenDescriptor
+      var pemContent = File.ReadAllText(keyPath);
+      if (string.IsNullOrWhiteSpace(pemContent))
       {
-        Subject = new ClaimsIdentity(
-          [
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.Name),
-            //new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.IsAdmin? "Admin" : "User")
-          ]),
-        Expires = DateTime.UtcNow.AddHours(hoursValidity),
-        SigningCredentials = new SigningCredentials(new RsaSecurityKey(rsa), SecurityAlgorithms.RsaSha256),
-      };
+        _logger.LogError($"Could no load Public Key");
+        return string.Empty;
+      }
 
-      var token = tokenHandler.CreateToken(tokenDescriptor);
-      return tokenHandler.WriteToken(token);
+      try
+      {
+        using var rsa = RSA.Create();
+        rsa.ImportFromPem(pemContent);
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+          Subject = new ClaimsIdentity(new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
+            }),
+          Expires = DateTime.UtcNow.AddHours(hoursValidity),
+
+          SigningCredentials = new SigningCredentials(
+                new RsaSecurityKey(rsa),
+                SecurityAlgorithms.RsaSha256
+            )
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        return tokenHandler.WriteToken(token);
+      }
+      catch (Exception ex)
+      {
+        _logger.LogError(ex, "Error: could not generate JWT token");
+        return string.Empty;
+      }
     }
 
     public static bool CheckPassword(string pass, string hash)

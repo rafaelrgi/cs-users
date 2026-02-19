@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Users.src.Domain.Entities;
 
-namespace Users.Data
+namespace Users.Infra
 {
   public class Db : DbContext
   {
@@ -16,8 +16,7 @@ namespace Users.Data
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-      //bring the also the "blocked" (deleted) users, so they can be unblocked
-      //modelBuilder.Entity<User>().HasQueryFilter(p => p.DeletedAt == null);
+      modelBuilder.Entity<User>().HasQueryFilter(p => p.DeletedAt == null);
     }
 
     public override int SaveChanges()
@@ -26,13 +25,13 @@ namespace Users.Data
       return base.SaveChanges();
     }
 
-    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
     {
       AddTimestamps();
       return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
     }
 
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
       AddTimestamps();
       return await base.SaveChangesAsync(cancellationToken);
@@ -45,7 +44,7 @@ namespace Users.Data
 
       foreach (var entity in entities)
       {
-        var now = DateTime.Now; //UtcNow ???
+        var now = DateTime.UtcNow;
         if (entity.State == EntityState.Added)
           ((BaseEntity)entity.Entity).CreatedAt = now;
 

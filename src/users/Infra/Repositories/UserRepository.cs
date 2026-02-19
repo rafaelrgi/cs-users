@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Users.Data;
+using Users.Infra;
 using Users.src.Domain.Contracts;
 using Users.src.Domain.Core;
 using Users.src.Domain.Entities;
@@ -74,7 +74,7 @@ namespace Users.src.Infra.Repositories
 
     public async Task<bool> Delete(User user)
     {
-      user.DeletedAt = DateTime.Now;
+      user.DeletedAt = DateTime.UtcNow;
       _db.Users.Update(user);
       return (await _db.SaveChangesAsync() > 0);
     }

@@ -20,15 +20,15 @@ namespace Users.src.Web.Controllers
     [AllowAnonymous]
     public async Task<ActionResult> Login([FromBody] User? user)
     {
-      if (user== null || string.IsNullOrWhiteSpace(user.Email) || string.IsNullOrWhiteSpace(user.Password))
+      if (user == null || string.IsNullOrWhiteSpace(user.Email) || string.IsNullOrWhiteSpace(user.Password))
         return BadRequest();
 
 #if DEBUG
       //FIXME: temp
       if (user.Email == "ms")
-        user.Email = "ms@mail.com";
+        user.Email = "admin@email.com";
       if (user.Email == "jd")
-        user.Email = "jd@mail.com";
+        user.Email = "jd@email.com";
 #endif
 
       (string token, user) = await _service.Login(user.Email, user.Password);
@@ -37,8 +37,9 @@ namespace Users.src.Web.Controllers
 
       return Ok(new
       {
-        token = token,
-        user = new {
+        token,
+        user = new
+        {
           id = user.Id,
           email = user.Email,
           name = user.Name,

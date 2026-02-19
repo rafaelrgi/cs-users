@@ -28,7 +28,7 @@ namespace Users.src.Application.Services
       //pagination
       page = Math.Max(page, 1);
 
-      //sort & order  
+      //sort & order
       const string sort = "Name";
       const string order = "asc";
 
@@ -64,7 +64,7 @@ namespace Users.src.Application.Services
       if (row.IsDeleted != dto.IsDeleted)
       {
         if (dto.IsDeleted)
-          row.DeletedAt = DateTime.Now;
+          row.DeletedAt = DateTime.UtcNow;
         else
           row.DeletedAt = null;
       }

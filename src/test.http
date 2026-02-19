@@ -1,0 +1,39 @@
+### Variáveis
+@url = http://localhost:5001
+
+### Login para obter o Token
+# @name login
+POST {{url}}/api/auth
+Content-Type: application/json
+
+{
+  "email": "admin@email.com",
+  "password": "1234"
+}
+
+### Armazenar o Token da resposta acima
+@authToken = {{login.response.body.token}}
+
+
+### List Users
+GET {{url}}/api/users
+Authorization: Bearer {{authToken}}
+
+### User details
+GET {{url}}/api/users/1
+Authorization: Bearer {{authToken}}
+
+### Create User
+POST {{url}}/api/users
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "name": "admin",
+  "email": "admin@email.com",
+  "isAdmin": true,
+  "isDeleted": false,
+  "password": "1234",
+  "passwordNew": "1234",
+  "passwordCheck": "1234"
+}
