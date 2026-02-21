@@ -1,0 +1,16 @@
+services:
+  users-api:
+    build:
+      context: .
+      dockerfile: src/users/Dockerfile
+    container_name: users-api-container
+    user: "${MY_UID}:${MY_GID}"
+    network_mode: "host"
+    env_file:
+      - .env
+    environment:
+      - IS_DOCKER=true
+      - RsaKeys__PublicKeyPath=/app/keys/public.pem
+      - RsaKeys__PrivateKeyPath=/app/keys/private.pem
+    volumes:
+      - /home/rgi/.config/keys/api:/app/keys:ro

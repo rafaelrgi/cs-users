@@ -1,4 +1,5 @@
 ### Variáveis
+#@url = http://localhost:8080
 @url = http://localhost:5001
 
 ### Login para obter o Token

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Cryptography;
 
-namespace Users.src.Infra.Extensions;
+namespace Users.Infra;
 
 public static class JwtExtensions
 {

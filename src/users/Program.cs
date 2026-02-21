@@ -1,13 +1,9 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using System.Security.Cryptography;
 using Users.src.Application.Services;
 using Users.src.Domain.Contracts;
 using Users.src.Infra.Repositories;
 using Users.Infra;
-using Users.src.Infra.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,11 +11,16 @@ using ILoggerFactory factory = LoggerFactory.Create(builder => builder.AddConsol
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+//DB
+var connectionStringTemplate = builder.Configuration.GetConnectionString(Db.ConnectionName)!;
+var dbPassword = builder.Configuration["DbPassword"];
+var connectionString = string.Format(connectionStringTemplate, dbPassword);
 builder.Services.AddDbContext<Db>(options =>
 {
-  options.UseNpgsql(builder.Configuration.GetConnectionString(Db.ConnectionName)!,
-  x => x.MigrationsAssembly("Users"));
+  options.UseNpgsql(connectionString);
 });
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
